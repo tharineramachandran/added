@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-
+import baseURLAPI from "../../Global";
 import {
   Keyboard,
   TouchableOpacity,
@@ -25,6 +25,36 @@ export default class LoginScreen extends React.Component {
       photoUrl: "",
     };
   }
+  saveData = (email, password) => {
+    
+
+    // if(this.props.type !== 'Login')
+    // {
+     
+    Keyboard.dismiss();
+
+    const body = { TX_USER_NAME : email, TX_USER_EMAIL: email, TX_USER_PASSWORD : password};
+    console.log(body);
+
+    const response =   fetch(baseURLAPI + "/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    const parseResponse =   response.json()
+
+    if (parseResponse.jwtToken) {
+      AsyncStorage.setItem("jwtToken", parseResponse.jwtToken)
+
+      this.setState({
+        signedIn: true,
+        name: result.user.name,
+        photoUrl: result.user.photoUrl,
+      }); 
+      }
+  };
+
   signIn = async () => {
     try {
       const result = await Google.logInAsync({
@@ -54,7 +84,7 @@ export default class LoginScreen extends React.Component {
         {this.state.signedIn ? (
           <LoggedInPage name={this.state.name} photoUrl={this.state.photoUrl} />
         ) : (
-          <LoginPage signIn={this.signIn} />
+          <LoginPage signIn={this.signIn} saveData={this.saveData} />
         )}
       </View>
     );
@@ -65,51 +95,10 @@ const LoginPage = (props) => {
   const [signupView, setsignupView] = useState(false);
   const [email, setemailCredencials] = useState("");
   const [password, setpasswordCredencials] = useState("");
-  saveData = () => {
-    //save data with asyncstorage
-    let loginDetails = {
-      email: email,
-      password: password,
-    };
 
-    // if(this.props.type !== 'Login')
-    // {
-    AsyncStorage.setItem("loginDetails", JSON.stringify(loginDetails));
-    console.log(loginDetails);
-    Keyboard.dismiss();
-    alert(
-      "You successfully registered. Email: " + email + " password: " + password
-    );
-
-    // }
-    // else if(this.props.type == 'Login')
-    // {
-    //     try{
-    //         let loginDetails =   AsyncStorage.getItem('loginDetails');
-    //         let ld = JSON.parse(loginDetails);
-
-    //         if (ld.email != null && ld.password != null)
-    //         {
-    //             if (ld.email == email && ld.password == password)
-    //             {
-    //                 alert('Go in!');
-    //             }
-    //             else
-    //             {
-    //                 alert('Email and Password does not exist!');
-    //             }
-    //         }
-
-    //     }catch(error)
-    //     {
-    //         alert(error);
-    //     }
-    // }
-  };
   viewSignUp = () => {
-    
-     setsignupView(!signupView);
-  }; 
+    setsignupView(!signupView);
+  };
   showData = () => {
     let loginDetails = AsyncStorage.getItem("loginDetails");
     let ld = JSON.parse(loginDetails);
@@ -117,118 +106,100 @@ const LoginPage = (props) => {
   };
 
   return (
- 
-<View>  
+    <View>
+      {signupView ? (
+        <View>
+          <Text style={styles.header}>Register</Text>
 
-{signupView? ( <View>
+          <TextInput
+            style={styles.TextInput}
+            onChangeText={(email) => setemailCredencials(email)}
+            underlineColorAndroid="rgba(0,0,0,0)"
+            placeholder="Email"
+            placeholderTextColor="#002f6c"
+            selectionColor="#fff"
+            keyboardType="email-address"
+          />
 
- 
-<Text style={styles.header}>Register</Text>
+          <TextInput
+            style={styles.TextInput}
+            onChangeText={(password) => setpasswordCredencials(password)}
+            underlineColorAndroid="rgba(0,0,0,0)"
+            placeholder="Password"
+            placeholderTextColor="#002f6c"
+            selectionColor="#fff"
+            secureTextEntry={true}
+          />
+          <TouchableOpacity
+           onPress={() => props.saveData(email, password)} 
+            style={styles.UserButton}
+          >
+            <Text
+              style={{
+                color: "#fff",
+              }}
+            >
+              Register
+            </Text>
+          </TouchableOpacity>
 
-<TextInput
-  style={styles.TextInput}
-  onChangeText={(email) => setemailCredencials(email)}
-  underlineColorAndroid="rgba(0,0,0,0)"
-  placeholder="Email"
-  placeholderTextColor="#002f6c"
-  selectionColor="#fff"
-  keyboardType="email-address"
-/>
+          <TouchableOpacity onPress={() => viewSignUp()} style={styles.text}>
+            <Text
+              style={{
+                color: "#fff",
+              }}
+            >
+              Sign-In
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View>
+          <Text style={styles.header}>Login</Text>
 
-<TextInput
-  style={styles.TextInput}
-  onChangeText={(password) => setpasswordCredencials(password)}
-  underlineColorAndroid="rgba(0,0,0,0)"
-  placeholder="Password"
-  placeholderTextColor="#002f6c"
-  selectionColor="#fff"
-  secureTextEntry={true}
-/>
-<TouchableOpacity onPress={saveData} style={styles.UserButton}>
-  <Text
-    style={{
-      color: "#fff",
-    }}
-  >
-    Register
-  </Text>
-</TouchableOpacity> 
+          <TextInput
+            style={styles.TextInput}
+            onChangeText={(email) => setemailCredencials(email)}
+            underlineColorAndroid="rgba(0,0,0,0)"
+            placeholder="Email"
+            placeholderTextColor="#002f6c"
+            selectionColor="#fff"
+            keyboardType="email-address"
+          />
 
-<TouchableOpacity
-  onPress={() => viewSignUp()}
-  style={styles.text}
->
-  <Text
-    style={{
-      color: "#fff",
-    }}
-  >
-  Sign-In
-  </Text>
-</TouchableOpacity> 
-
-
-</View>) :( <View>
-
- 
-<Text style={styles.header}>Login</Text>
-
-<TextInput
-  style={styles.TextInput}
-  onChangeText={(email) => setemailCredencials(email)}
-  underlineColorAndroid="rgba(0,0,0,0)"
-  placeholder="Email"
-  placeholderTextColor="#002f6c"
-  selectionColor="#fff"
-  keyboardType="email-address"
-/>
-
-<TextInput
-  style={styles.TextInput}
-  onChangeText={(password) => setpasswordCredencials(password)}
-  underlineColorAndroid="rgba(0,0,0,0)"
-  placeholder="Password"
-  placeholderTextColor="#002f6c"
-  selectionColor="#fff"
-  secureTextEntry={true}
-/>
-<TouchableOpacity onPress={saveData} style={styles.UserButton}>
-  <Text
-    style={{
-      color: "#fff",
-    }}
-  >
-    Login
-  </Text>
-</TouchableOpacity>
-<TouchableOpacity
-  onPress={() => viewSignUp()}
-  style={styles.text}
->
-  <Text
-    style={{
-      color: "#000000",
-    }}
-  >
-   Not a user? Sign Up
-  </Text>
-</TouchableOpacity> 
-<TouchableOpacity
-  onPress={() => props.signIn()}
-  style={styles.googleButton}
->
-  <Text
-    style={{
-      color: "#fff",
-    }}
-  >
-    Sign in with Google
-  </Text>
-</TouchableOpacity>
-</View>) }
-</View>
-
-    
+          <TextInput
+            style={styles.TextInput}
+            onChangeText={(password) => setpasswordCredencials(password)}
+            underlineColorAndroid="rgba(0,0,0,0)"
+            placeholder="Password"
+            placeholderTextColor="#002f6c"
+            selectionColor="#fff"
+            secureTextEntry={true}
+          />
+          <TouchableOpacity
+             onPress={() => props.saveData(email, password)} 
+            style={styles.UserButton}
+          >
+            <Text style={{ color: "#fff" }}>Login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => viewSignUp()} style={styles.text}>
+            <Text
+              style={{
+                color: "#000000",
+              }}
+            >
+              Not a user? Sign Up
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => props.signIn()}
+            style={styles.googleButton}
+          >
+            <Text style={{ color: "#fff" }}>Sign in with Google</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
   );
 };
 
@@ -255,13 +226,15 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.2)",
     borderWidth: 3,
     borderRadius: 150,
-  },text :{     
-  width: 250, 
-  marginTop: 25,
-  alignContent: "center",
-  borderRadius: 4,
-  paddingVertical: 7,
-  alignItems: "center",},
+  },
+  text: {
+    width: 250,
+    marginTop: 25,
+    alignContent: "center",
+    borderRadius: 4,
+    paddingVertical: 7,
+    alignItems: "center",
+  },
   googleButton: {
     borderColor: "#3F80F6",
     backgroundColor: "#3F80F6",
