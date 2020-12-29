@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import baseURLAPI from "../../Global";
+import { baseURLAPI, baseURL } from "../../Global";
 import {
   Keyboard,
   TouchableOpacity,
@@ -7,14 +7,18 @@ import {
   Text,
   View,
   Image,
+  Platform,
   Button,
   div,
   Icon,
   TextInput,
+  useColorScheme,
 } from "react-native";
-import AsyncStorage from "@react-native-community/async-storage";
-
+import * as ImagePicker from "expo-image-picker";
 import * as Google from "expo-google-app-auth";
+import AsyncStorage from "@react-native-community/async-storage";
+const axios = require("axios");
+import Constants from "expo-constants";
 
 export default class LoginScreen extends React.Component {
   constructor(props) {
@@ -25,34 +29,64 @@ export default class LoginScreen extends React.Component {
       photoUrl: "",
     };
   }
-  saveData = (email, password) => {
-    
-
-    // if(this.props.type !== 'Login')
-    // {
-     
+  signUpUser = async (email, name, password, phone, url) => {
     Keyboard.dismiss();
 
-    const body = { TX_USER_NAME : email, TX_USER_EMAIL: email, TX_USER_PASSWORD : password};
-    console.log(body);
+    const body = {
+      TX_USER_NAME: name,
+      TX_USER_EMAIL: email,
+      TX_USER_PASSWORD: password,
+      TX_USER_PHONE: phone,
+      TX_USER_PICTURE: image,
+    };
+    console.log(baseURLAPI);
 
-    const response =   fetch(baseURLAPI + "/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
+    axios
+      .post(baseURLAPI + "/auth/register", body)
+      .then((response) => {
+        if (response.data.jwtToken) {
+          AsyncStorage.setItem("jwtToken", response.data.jwtToken);
 
-    const parseResponse =   response.json()
+          this.setState({
+            signedIn: true,
+            name: response.data.jwtToken,
+            photoUrl: "result.user.photoUrl",
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("error");
 
-    if (parseResponse.jwtToken) {
-      AsyncStorage.setItem("jwtToken", parseResponse.jwtToken)
+        console.log(error);
+      });
+  };
+  signInUser = async (email, password) => {
+    Keyboard.dismiss();
 
-      this.setState({
-        signedIn: true,
-        name: result.user.name,
-        photoUrl: result.user.photoUrl,
-      }); 
-      }
+    const body = {
+      TX_USER_NAME: email,
+      TX_USER_EMAIL: email,
+      TX_USER_PASSWORD: password,
+    };
+    console.log(baseURLAPI);
+    axios
+      .post(baseURLAPI + "/auth/login", body)
+      .then((response) => {
+        if (response.data.jwtToken) {
+          AsyncStorage.setItem("jwtToken", response.data.jwtToken);
+
+          this.setState({
+            signedIn: true,
+            name: response.data.jwtToken,
+            photoUrl: "result.user.photoUrl",
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("error");
+
+        console.log(error);
+      });
   };
 
   signIn = async () => {
@@ -66,13 +100,34 @@ export default class LoginScreen extends React.Component {
       });
 
       if (result.type === "success") {
-        this.setState({
-          signedIn: true,
-          name: result.user.name,
-          photoUrl: result.user.photoUrl,
-        });
-      } else {
-        console.log("cancelled");
+        console.log(result.user);
+        var user = result.user;
+
+        const body = {
+          TX_USER_NAME: user.name,
+          TX_USER_EMAIL: user.email,
+          TX_GOOGLE_ID: user.id,
+          TX_USER_PICTURE: user.photoUrl,
+        };
+        console.log(baseURLAPI);
+        axios
+          .post(baseURLAPI + "/auth/socialauth", body)
+          .then((response) => {
+            if (response.data.jwtToken) {
+              AsyncStorage.setItem("jwtToken", response.data.jwtToken);
+
+              this.setState({
+                signedIn: true,
+                name: response.data.jwtToken,
+                photoUrl: "result.user.photoUrl",
+              });
+            }
+          })
+          .catch((error) => {
+            console.log("error");
+
+            console.log(error);
+          });
       }
     } catch (e) {
       console.log("error", e);
@@ -84,7 +139,11 @@ export default class LoginScreen extends React.Component {
         {this.state.signedIn ? (
           <LoggedInPage name={this.state.name} photoUrl={this.state.photoUrl} />
         ) : (
-          <LoginPage signIn={this.signIn} saveData={this.saveData} />
+          <LoginPage
+            signIn={this.signIn}
+            signUpUser={this.signUpUser}
+            signInUser={this.signInUser}
+          />
         )}
       </View>
     );
@@ -96,13 +155,43 @@ const LoginPage = (props) => {
   const [email, setemailCredencials] = useState("");
   const [password, setpasswordCredencials] = useState("");
 
-  viewSignUp = () => {
-    setsignupView(!signupView);
+  const [name, setnameCredencials] = useState("");
+  const [phone, setphoneCredencials] = useState("");
+
+  const [url, seturlCredencials] = useState("");
+  const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS !== "web") {
+        const {
+          status,
+        } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          alert("Sorry, we need camera roll permissions to make this work!");
+        }
+      }
+    })();
+  }, []);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      base64: true,
+      aspect: [4, 4],
+      quality: 1,
+    });
+
+    console.log(result);
+    console.log("image asset", result);
+    if (!result.cancelled) {
+      setImage(result.uri);
+    }
   };
-  showData = () => {
-    let loginDetails = AsyncStorage.getItem("loginDetails");
-    let ld = JSON.parse(loginDetails);
-    alert("email: " + ld.email + " " + "password: " + ld.password);
+
+  const viewSignUp = () => {
+    setsignupView(!signupView);
   };
 
   return (
@@ -110,6 +199,69 @@ const LoginPage = (props) => {
       {signupView ? (
         <View>
           <Text style={styles.header}>Register</Text>
+
+          <TouchableOpacity
+            style={{
+              alignContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {image ? (
+              <TouchableOpacity
+                style={{
+                  alignContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={{ uri: image }}
+                  style={{ width: 100, height: 100, borderRadius: 50 }}
+                />
+                <Text
+                  onPress={pickImage}
+                  style={{
+                    color: "#002f6c",
+                  }}
+                >
+                  Change Image
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={pickImage}
+                style={{
+                  borderColor: "#27AE62",
+                  backgroundColor: "#27AE62",
+                  alignContent: "center",
+                  alignItems: "center",
+
+                  backgroundColor: "#27AE62",
+                  width: 100,
+                  height: 100,
+                  borderRadius: 50,
+                }}
+              >
+                <Text
+                  style={{
+                    paddingTop: 30,
+                    paddingLeft: 10,
+                    color: "#fff",
+                  }}
+                >
+                  Add a profile picture
+                </Text>
+              </TouchableOpacity>
+            )}
+          </TouchableOpacity>
+          <TextInput
+            style={styles.TextInput}
+            onChangeText={(name) => setnameCredencials(name)}
+            underlineColorAndroid="rgba(0,0,0,0)"
+            placeholder="Name"
+            placeholderTextColor="#002f6c"
+            selectionColor="#fff"
+            keyboardType="default"
+          />
 
           <TextInput
             style={styles.TextInput}
@@ -123,6 +275,16 @@ const LoginPage = (props) => {
 
           <TextInput
             style={styles.TextInput}
+            onChangeText={(phone) => setphoneCredencials(phone)}
+            underlineColorAndroid="rgba(0,0,0,0)"
+            placeholder="Phone"
+            placeholderTextColor="#002f6c"
+            selectionColor="#fff"
+            keyboardType="numeric"
+          />
+
+          <TextInput
+            style={styles.TextInput}
             onChangeText={(password) => setpasswordCredencials(password)}
             underlineColorAndroid="rgba(0,0,0,0)"
             placeholder="Password"
@@ -130,8 +292,9 @@ const LoginPage = (props) => {
             selectionColor="#fff"
             secureTextEntry={true}
           />
+
           <TouchableOpacity
-           onPress={() => props.saveData(email, password)} 
+            onPress={() => props.signUpUser(email, name, password, phone, url)}
             style={styles.UserButton}
           >
             <Text
@@ -143,10 +306,10 @@ const LoginPage = (props) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => viewSignUp()} style={styles.text}>
+          <TouchableOpacity onPress={viewSignUp} style={styles.text}>
             <Text
               style={{
-                color: "#fff",
+                color: "#002f6c",
               }}
             >
               Sign-In
@@ -177,12 +340,12 @@ const LoginPage = (props) => {
             secureTextEntry={true}
           />
           <TouchableOpacity
-             onPress={() => props.saveData(email, password)} 
+            onPress={() => props.signInUser(email, password)}
             style={styles.UserButton}
           >
             <Text style={{ color: "#fff" }}>Login</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => viewSignUp()} style={styles.text}>
+          <TouchableOpacity onPress={viewSignUp} style={styles.text}>
             <Text
               style={{
                 color: "#000000",
