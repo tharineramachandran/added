@@ -10,7 +10,7 @@ import {
   Platform,
   Button,
   div,
-  Icon,
+  Icon,ImageBackground,
   TextInput,
   useColorScheme,
 } from "react-native";
@@ -19,133 +19,39 @@ import * as Google from "expo-google-app-auth";
 import AsyncStorage from "@react-native-community/async-storage";
 const axios = require("axios");
 import Constants from "expo-constants";
+import styles from "../styles/styles";
+import Homepage from "./Homepage";
 
+        
+const image = { uri: "https://reactjs.org/logo-og.png" };
 export default class LoginScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       signedIn: false,
-      name: "",
-      photoUrl: "",
     };
   }
-  signUpUser = async (email, name, password, phone, url) => {
-    Keyboard.dismiss();
-
-    const body = {
-      TX_USER_NAME: name,
-      TX_USER_EMAIL: email,
-      TX_USER_PASSWORD: password,
-      TX_USER_PHONE: phone,
-      TX_USER_PICTURE: image,
-    };
-    console.log(baseURLAPI);
-
-    axios
-      .post(baseURLAPI + "/auth/register", body)
-      .then((response) => {
-        if (response.data.jwtToken) {
-          AsyncStorage.setItem("jwtToken", response.data.jwtToken);
-
-          this.setState({
-            signedIn: true,
-            name: response.data.jwtToken,
-            photoUrl: "result.user.photoUrl",
-          });
-        }
-      })
-      .catch((error) => {
-        console.log("error");
-
-        console.log(error);
-      });
-  };
-  signInUser = async (email, password) => {
-    Keyboard.dismiss();
-
-    const body = {
-      TX_USER_NAME: email,
-      TX_USER_EMAIL: email,
-      TX_USER_PASSWORD: password,
-    };
-    console.log(baseURLAPI);
-    axios
-      .post(baseURLAPI + "/auth/login", body)
-      .then((response) => {
-        if (response.data.jwtToken) {
-          AsyncStorage.setItem("jwtToken", response.data.jwtToken);
-
-          this.setState({
-            signedIn: true,
-            name: response.data.jwtToken,
-            photoUrl: "result.user.photoUrl",
-          });
-        }
-      })
-      .catch((error) => {
-        console.log("error");
-
-        console.log(error);
-      });
+  setLogin = async () => {
+    this.setState({
+      signedIn: true,
+    });
   };
 
-  signIn = async () => {
-    try {
-      const result = await Google.logInAsync({
-        androidClientId:
-          "770480272379-786um8vmqi9p35ingldm4celsrk2jshi.apps.googleusercontent.com",
-        iosClientId:
-          "770480272379-rlr3mcpthnr02t3rul9ls1u5p4k2bsm6.apps.googleusercontent.com",
-        scopes: ["profile", "email"],
-      });
-
-      if (result.type === "success") {
-        console.log(result.user);
-        var user = result.user;
-
-        const body = {
-          TX_USER_NAME: user.name,
-          TX_USER_EMAIL: user.email,
-          TX_GOOGLE_ID: user.id,
-          TX_USER_PICTURE: user.photoUrl,
-        };
-        console.log(baseURLAPI);
-        axios
-          .post(baseURLAPI + "/auth/socialauth", body)
-          .then((response) => {
-            if (response.data.jwtToken) {
-              AsyncStorage.setItem("jwtToken", response.data.jwtToken);
-
-              this.setState({
-                signedIn: true,
-                name: response.data.jwtToken,
-                photoUrl: "result.user.photoUrl",
-              });
-            }
-          })
-          .catch((error) => {
-            console.log("error");
-
-            console.log(error);
-          });
-      }
-    } catch (e) {
-      console.log("error", e);
-    }
-  };
   render() {
     return (
-      <View style={styles.container}>
+       
+
+ <ImageBackground source={image} style={styles.coverImage}>
+ 
+
         {this.state.signedIn ? (
-          <LoggedInPage name={this.state.name} photoUrl={this.state.photoUrl} />
+          <LoggedInPage />
         ) : (
-          <LoginPage
-            signIn={this.signIn}
-            signUpUser={this.signUpUser}
-            signInUser={this.signInUser}
-          />
+          <LoginPage setLogin={this.setLogin} />
         )}
-      </View>
+  </ImageBackground>
+
+     
     );
   }
 }
@@ -157,8 +63,10 @@ const LoginPage = (props) => {
 
   const [name, setnameCredencials] = useState("");
   const [phone, setphoneCredencials] = useState("");
+  const [RegisterErrorList, setRegisterErrorList] = useState("");
+  const [GoogleErrorList, setGoogleErrorList] = useState("");
+  const [SignInErrorList, setSignInerrorList] = useState("");
 
-  const [url, seturlCredencials] = useState("");
   const [image, setImage] = useState(null);
 
   useEffect(() => {
@@ -191,21 +99,113 @@ const LoginPage = (props) => {
   };
 
   const viewSignUp = () => {
+    Keyboard.dismiss();
     setsignupView(!signupView);
+  };
+
+  const signUpUser = async (email, name, password, phone, image) => {
+    Keyboard.dismiss();
+    if (email && name && password && phone && image) {
+      const body = {
+        TX_USER_NAME: name,
+        TX_USER_EMAIL: email,
+        TX_USER_PASSWORD: password,
+        TX_USER_PHONE: phone,
+        TX_USER_PICTURE: image,
+      };
+      console.log(baseURLAPI);
+
+      axios
+        .post(baseURLAPI + "/auth/register", body)
+        .then((response) => {
+          if (response.data.jwtToken) {
+            AsyncStorage.setItem("jwtToken", response.data.jwtToken);
+            props.setLogin();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          setRegisterErrorList("An error occured");
+        });
+    } else {
+      setRegisterErrorList("Incomplete details");
+    }
+  };
+  const signInUser = async (email, password) => {
+    Keyboard.dismiss();
+    if (email && password) {
+      const body = {
+        TX_USER_NAME: email,
+        TX_USER_EMAIL: email,
+        TX_USER_PASSWORD: password,
+      };
+      console.log(baseURLAPI);
+      axios
+        .post(baseURLAPI + "/auth/login", body)
+        .then((response) => {
+          if (response.data.jwtToken) {
+            AsyncStorage.setItem("jwtToken", response.data.jwtToken);
+            props.setLogin();
+          }
+        })
+        .catch((error) => {
+          setSignInerrorList("An error occured");
+        });
+    } else {
+      setSignInerrorList("Incomplete details");
+    }
+  };
+  const signIn = async () => {
+    Keyboard.dismiss();
+    try {
+      const result = await Google.logInAsync({
+        androidClientId:
+          "770480272379-786um8vmqi9p35ingldm4celsrk2jshi.apps.googleusercontent.com",
+        iosClientId:
+          "770480272379-rlr3mcpthnr02t3rul9ls1u5p4k2bsm6.apps.googleusercontent.com",
+        scopes: ["profile", "email"],
+      });
+
+      if (result.type === "success") {
+        console.log(result.user);
+        var user = result.user;
+
+        const body = {
+          TX_USER_NAME: user.name,
+          TX_USER_EMAIL: user.email,
+          TX_GOOGLE_ID: user.id,
+          TX_USER_PICTURE: user.photoUrl,
+        };
+        console.log(baseURLAPI);
+        axios
+          .post(baseURLAPI + "/auth/socialauth", body)
+          .then((response) => {
+            if (response.data.jwtToken) {
+              AsyncStorage.setItem("jwtToken", response.data.jwtToken);
+
+              props.setLogin();
+            }
+          })
+          .catch((error) => {});
+      }
+    } catch (e) {
+      console.log("error", e);
+      setGoogleErrorList("Could not sign in using google");
+    }
   };
 
   return (
     <View>
       {signupView ? (
-        <View>
-          <Text style={styles.header}>Register</Text>
+        <View
+          style={{
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.header}>Sign Up</Text>
 
-          <TouchableOpacity
-            style={{
-              alignContent: "center",
-              alignItems: "center",
-            }}
-          >
+          <TouchableOpacity>
             {image ? (
               <TouchableOpacity
                 style={{
@@ -234,21 +234,22 @@ const LoginPage = (props) => {
                   backgroundColor: "#27AE62",
                   alignContent: "center",
                   alignItems: "center",
-
                   backgroundColor: "#27AE62",
                   width: 100,
                   height: 100,
                   borderRadius: 50,
+                  marginTop: 25,
+                  paddingVertical: 7,
                 }}
               >
                 <Text
                   style={{
-                    paddingTop: 30,
-                    paddingLeft: 10,
+                    paddingTop: 32,
+                    paddingLeft:2,
                     color: "#fff",
                   }}
                 >
-                  Add a profile picture
+                  Add photo
                 </Text>
               </TouchableOpacity>
             )}
@@ -257,7 +258,7 @@ const LoginPage = (props) => {
             style={styles.TextInput}
             onChangeText={(name) => setnameCredencials(name)}
             underlineColorAndroid="rgba(0,0,0,0)"
-            placeholder="Name"
+            placeholder="Name and Surname"
             placeholderTextColor="#002f6c"
             selectionColor="#fff"
             keyboardType="default"
@@ -267,7 +268,7 @@ const LoginPage = (props) => {
             style={styles.TextInput}
             onChangeText={(email) => setemailCredencials(email)}
             underlineColorAndroid="rgba(0,0,0,0)"
-            placeholder="Email"
+            placeholder="Email Address"
             placeholderTextColor="#002f6c"
             selectionColor="#fff"
             keyboardType="email-address"
@@ -292,9 +293,31 @@ const LoginPage = (props) => {
             selectionColor="#fff"
             secureTextEntry={true}
           />
+          {!!RegisterErrorList && (
+            <TouchableOpacity
+              style={{
+                borderColor: "#DC143C",
+                width: 250,
+                borderWidth: 2,
+                marginTop: 25,
+                alignContent: "center",
+                borderRadius: 23,
+                paddingVertical: 7,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#DC143C",
+                }}
+              >
+                {RegisterErrorList}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
-            onPress={() => props.signUpUser(email, name, password, phone, url)}
+            onPress={() => signUpUser(email, name, password, phone, image)}
             style={styles.UserButton}
           >
             <Text
@@ -306,59 +329,107 @@ const LoginPage = (props) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={viewSignUp} style={styles.text}>
-            <Text
-              style={{
-                color: "#002f6c",
-              }}
-            >
-              Sign-In
-            </Text>
+          <TouchableOpacity onPress={() => viewSignUp()} style={styles.text}>
+            <Text style={{ color: "#002f6c" }}>Sign-In</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <View>
-          <Text style={styles.header}>Login</Text>
+        <View
+          style={{
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.header}>Welcome</Text>
+          <TouchableOpacity>
+            <TextInput
+              style={styles.TextInput}
+              onChangeText={(email) => setemailCredencials(email)}
+              underlineColorAndroid="rgba(0,0,0,0)"
+              placeholder="Email Address"
+              placeholderTextColor="#002f6c"
+              selectionColor="#fff"
+              keyboardType="email-address"
+            />
 
-          <TextInput
-            style={styles.TextInput}
-            onChangeText={(email) => setemailCredencials(email)}
-            underlineColorAndroid="rgba(0,0,0,0)"
-            placeholder="Email"
-            placeholderTextColor="#002f6c"
-            selectionColor="#fff"
-            keyboardType="email-address"
-          />
+            <TextInput
+              style={styles.TextInput}
+              onChangeText={(password) => setpasswordCredencials(password)}
+              underlineColorAndroid="rgba(0,0,0,0)"
+              placeholder="Password"
+              placeholderTextColor="#002f6c"
+              selectionColor="#fff"
+              secureTextEntry={true}
+            />
 
-          <TextInput
-            style={styles.TextInput}
-            onChangeText={(password) => setpasswordCredencials(password)}
-            underlineColorAndroid="rgba(0,0,0,0)"
-            placeholder="Password"
-            placeholderTextColor="#002f6c"
-            selectionColor="#fff"
-            secureTextEntry={true}
-          />
-          <TouchableOpacity
-            onPress={() => props.signInUser(email, password)}
-            style={styles.UserButton}
-          >
-            <Text style={{ color: "#fff" }}>Login</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={viewSignUp} style={styles.text}>
-            <Text
-              style={{
-                color: "#000000",
-              }}
+            {!!SignInErrorList && (
+              <TouchableOpacity
+                style={{
+                  borderColor: "#DC143C",
+
+                  width: 250,
+                  borderWidth: 2,
+                  marginTop: 25,
+                  alignContent: "center",
+                  borderRadius: 23,
+                  paddingVertical: 7,
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#DC143C",
+                  }}
+                >
+                  {SignInErrorList}
+                </Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => signInUser(email, password)}
+              style={styles.UserButton}
             >
-              Not a user? Sign Up
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => props.signIn()}
-            style={styles.googleButton}
-          >
-            <Text style={{ color: "#fff" }}>Sign in with Google</Text>
+              <Text style={{ color: "#fff" }}>Login</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => viewSignUp()} style={styles.text}>
+              <Text
+                style={{
+                  color: "#000000",
+                }}
+              >
+                Don't have an account ? Sign Up
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => signIn()}
+              style={styles.googleButton}
+            >
+              <Text style={{ color: "#fff" }}>Sign in with Google</Text>
+            </TouchableOpacity>
+
+            {!!GoogleErrorList && (
+              <TouchableOpacity
+                style={{
+                  borderColor: "#DC143C",
+
+                  width: 250,
+                  borderWidth: 2,
+                  marginTop: 25,
+                  alignContent: "center",
+                  borderRadius: 23,
+                  paddingVertical: 7,
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#DC143C",
+                  }}
+                >
+                  {GoogleErrorList}
+                </Text>
+              </TouchableOpacity>
+            )}
           </TouchableOpacity>
         </View>
       )}
@@ -366,67 +437,13 @@ const LoginPage = (props) => {
   );
 };
 
-const LoggedInPage = (props) => {
+const LoggedInPage = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Welcome:{props.name}</Text>
-      <Image style={styles.image} source={{ uri: props.photoUrl }} />
+      <Homepage />
+
+      {/* <Text style={styles.header}>Welcome:{props.name}</Text>
+      <Image style={styles.image} source={{ uri: props.photoUrl }} /> */}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-  },
-  header: {
-    fontSize: 25,
-  },
-  image: {
-    marginTop: 15,
-    width: 150,
-    height: 150,
-    borderColor: "rgba(0,0,0,0.2)",
-    borderWidth: 3,
-    borderRadius: 150,
-  },
-  text: {
-    width: 250,
-    marginTop: 25,
-    alignContent: "center",
-    borderRadius: 4,
-    paddingVertical: 7,
-    alignItems: "center",
-  },
-  googleButton: {
-    borderColor: "#3F80F6",
-    backgroundColor: "#3F80F6",
-    width: 250,
-    borderWidth: 2,
-    marginTop: 25,
-    alignContent: "center",
-    borderRadius: 4,
-    paddingVertical: 7,
-    alignItems: "center",
-  },
-  UserButton: {
-    borderColor: "#27AE62",
-    backgroundColor: "#27AE62",
-    width: 250,
-    borderWidth: 2,
-    marginTop: 25,
-    alignContent: "center",
-    borderRadius: 23,
-    paddingVertical: 7,
-    alignItems: "center",
-  },
-  TextInput: {
-    width: 250,
-    borderWidth: 2,
-    marginTop: 15,
-    borderColor: "#00716F",
-    borderRadius: 23,
-    paddingVertical: 2,
-    paddingHorizontal: 30,
-  },
-});

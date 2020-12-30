@@ -1,22 +1,42 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, ImageBackground,View } from 'react-native';
 import LoginScreen from "./app/screen/LoginScreen"
+
+const image = { uri: "https://tse3.mm.bing.net/th?id=OIP.L857w52WNU4nnKz0-dNJlwHaEK&pid=Api&P=0&w=277&h=157" };
+
 export default function App() {
   return (
+    // <View style={styles.container}>
+    //   
+    // </View>
+
     <View style={styles.container}>
-      <LoginScreen />
-    </View>
+    <ImageBackground source={image} style={styles.image}>
+     <LoginScreen />
+    </ImageBackground>
+  </View>
+
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "column"
   },
+  image: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center"
+  },
+  text: {
+    color: "white",
+    fontSize: 42,
+    fontWeight: "bold",
+    textAlign: "center",
+    backgroundColor: "#000000a0"
+  }
 });
 // import React, { useEffect, useState } from 'react';
 // import { AsyncStorage, Button, StyleSheet, Text, View } from 'react-native';

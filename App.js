@@ -1,23 +1,15 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import LoginScreen from "./app/screen/LoginScreen"
+import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import LoginScreen from "./app/screen/LoginScreen";
 export default function App() {
   return (
-    <View style={styles.container}>
+    <View>
       <LoginScreen />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 // import React, { useEffect, useState } from 'react';
 // import { AsyncStorage, Button, StyleSheet, Text, View } from 'react-native';
 // import * as AppAuth from 'expo-app-auth';
@@ -125,10 +117,8 @@ const styles = StyleSheet.create({
 
 // import React from "react"
 // import { StyleSheet, Text, View, Image, Button } from "react-native"
- 
+
 // import * as Google from 'expo-google-app-auth';
-
-
 
 // export default class App extends React.Component {
 //   constructor(props) {
@@ -144,7 +134,7 @@ const styles = StyleSheet.create({
 //       const result = await Google.logInAsync({
 //         androidClientId:
 //           "770480272379-786um8vmqi9p35ingldm4celsrk2jshi.apps.googleusercontent.com",
-//          iosClientId: "770480272379-rlr3mcpthnr02t3rul9ls1u5p4k2bsm6.apps.googleusercontent.com",  
+//          iosClientId: "770480272379-rlr3mcpthnr02t3rul9ls1u5p4k2bsm6.apps.googleusercontent.com",
 //         scopes: ["profile", "email"]
 //       })
 
