@@ -47,7 +47,7 @@ router.post("/socialauth", validInfo, async (req, res) => {
 
   try {
     const user = await pool.query('SELECT * FROM "T_USER" WHERE "TX_GOOGLE_ID" = $1', [
-      TX_USER_EMAIL
+      TX_GOOGLE_ID
     ]);
      
     if (user.rows.length !== 0) { 

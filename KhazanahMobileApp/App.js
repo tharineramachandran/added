@@ -12,9 +12,9 @@ export default function App() {
     // </View>
 
     <View style={styles.container}>
-    <ImageBackground source={image} style={styles.image}>
+   
      <LoginScreen />
-    </ImageBackground>
+  
   </View>
 
   );

@@ -20,7 +20,8 @@ const styles = StyleSheet.create({
       },
   header: {
     fontSize: 25,
-    padding: 10
+    padding: 10,
+    color:"#d7dee0"
   },
 
   coverImage: {
@@ -78,12 +79,15 @@ const styles = StyleSheet.create({
   },
   TextInput: {
     width: 250,
-    borderWidth: 2,
+    borderWidth: 1,
     marginTop: 25,
-    borderColor: "#00716F", textAlign: "center",
+    borderColor: "#d7dee0", textAlign: "center",
     borderRadius: 23,
     paddingVertical:4,
     paddingHorizontal: 30,
+     color:"#d7dee0",
+   
+      
   },
 });
 export default styles;

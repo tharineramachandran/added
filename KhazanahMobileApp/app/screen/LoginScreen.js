@@ -23,7 +23,8 @@ import styles from "../styles/styles";
 import Homepage from "./Homepage";
 
         
-const image = { uri: "https://reactjs.org/logo-og.png" };
+const image = { uri: "https://jooinn.com/images/milky-green-blurred-background-1.jpg" };
+
 export default class LoginScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -40,17 +41,23 @@ export default class LoginScreen extends React.Component {
   render() {
     return (
        
+      <View style={ styles.container} >
+        {this.state.signedIn ?    
+      (   <ImageBackground source={image} style={styles.coverImage}>
+ 
 
+ <LoggedInPage /> 
+ </ImageBackground>)
+
+        
+          :  (
  <ImageBackground source={image} style={styles.coverImage}>
  
 
-        {this.state.signedIn ? (
-          <LoggedInPage />
-        ) : (
           <LoginPage setLogin={this.setLogin} />
-        )}
-  </ImageBackground>
-
+  </ImageBackground>)
+         }
+        </View>
      
     );
   }
@@ -125,7 +132,7 @@ const LoginPage = (props) => {
         })
         .catch((error) => {
           console.log(error);
-          setRegisterErrorList("An error occured");
+          setRegisterErrorList("please check your credencials");
         });
     } else {
       setRegisterErrorList("Incomplete details");
@@ -149,7 +156,7 @@ const LoginPage = (props) => {
           }
         })
         .catch((error) => {
-          setSignInerrorList("An error occured");
+          setSignInerrorList("Email and password don't match");
         });
     } else {
       setSignInerrorList("Incomplete details");
@@ -202,9 +209,22 @@ const LoginPage = (props) => {
             alignContent: "center",
             alignItems: "center",
           }}
-        >
-          <Text style={styles.header}>Sign Up</Text>
+        ><Text style={
+          {fontSize: 50,
+          padding: 1,
+          color:"#d7dee0"}
 
+
+
+       }>Sign Up</Text>
+        <Text style={
+          {fontSize:20,
+          paddingBottom: 10,
+          color:"#d7dee0"}
+
+
+
+       }>add a text here </Text>
           <TouchableOpacity>
             {image ? (
               <TouchableOpacity
@@ -220,7 +240,7 @@ const LoginPage = (props) => {
                 <Text
                   onPress={pickImage}
                   style={{
-                    color: "#002f6c",
+                    color: "#d7dee0",
                   }}
                 >
                   Change Image
@@ -230,11 +250,10 @@ const LoginPage = (props) => {
               <TouchableOpacity
                 onPress={pickImage}
                 style={{
-                  borderColor: "#27AE62",
-                  backgroundColor: "#27AE62",
+                  borderColor: "#d7dee0", 
+                  borderWidth:1,
                   alignContent: "center",
-                  alignItems: "center",
-                  backgroundColor: "#27AE62",
+                  alignItems: "center", 
                   width: 100,
                   height: 100,
                   borderRadius: 50,
@@ -246,7 +265,7 @@ const LoginPage = (props) => {
                   style={{
                     paddingTop: 32,
                     paddingLeft:2,
-                    color: "#fff",
+                    color: "#d7dee0",
                   }}
                 >
                   Add photo
@@ -259,8 +278,8 @@ const LoginPage = (props) => {
             onChangeText={(name) => setnameCredencials(name)}
             underlineColorAndroid="rgba(0,0,0,0)"
             placeholder="Name and Surname"
-            placeholderTextColor="#002f6c"
-            selectionColor="#fff"
+            placeholderTextColor="#d7dee0"
+            selectionColor="#d7dee0"
             keyboardType="default"
           />
 
@@ -269,8 +288,8 @@ const LoginPage = (props) => {
             onChangeText={(email) => setemailCredencials(email)}
             underlineColorAndroid="rgba(0,0,0,0)"
             placeholder="Email Address"
-            placeholderTextColor="#002f6c"
-            selectionColor="#fff"
+            placeholderTextColor="#d7dee0"
+            selectionColor="#d7dee0"
             keyboardType="email-address"
           />
 
@@ -279,8 +298,8 @@ const LoginPage = (props) => {
             onChangeText={(phone) => setphoneCredencials(phone)}
             underlineColorAndroid="rgba(0,0,0,0)"
             placeholder="Phone"
-            placeholderTextColor="#002f6c"
-            selectionColor="#fff"
+            placeholderTextColor="#d7dee0"
+            selectionColor="#d7dee0"
             keyboardType="numeric"
           />
 
@@ -289,8 +308,8 @@ const LoginPage = (props) => {
             onChangeText={(password) => setpasswordCredencials(password)}
             underlineColorAndroid="rgba(0,0,0,0)"
             placeholder="Password"
-            placeholderTextColor="#002f6c"
-            selectionColor="#fff"
+            placeholderTextColor="#d7dee0"
+            selectionColor="#d7dee0"
             secureTextEntry={true}
           />
           {!!RegisterErrorList && (
@@ -322,7 +341,7 @@ const LoginPage = (props) => {
           >
             <Text
               style={{
-                color: "#fff",
+                color: "#d7dee0",
               }}
             >
               Register
@@ -340,15 +359,30 @@ const LoginPage = (props) => {
             alignItems: "center",
           }}
         >
-          <Text style={styles.header}>Welcome</Text>
+          <Text style={
+             {fontSize: 50,
+             padding: 1,
+             color:"#d7dee0"}
+
+
+
+          }>Welcome</Text>
+           <Text style={
+             {fontSize:20,
+             paddingBottom: 10,
+             color:"#d7dee0"}
+
+
+
+          }>add a text here </Text>
           <TouchableOpacity>
             <TextInput
               style={styles.TextInput}
               onChangeText={(email) => setemailCredencials(email)}
               underlineColorAndroid="rgba(0,0,0,0)"
               placeholder="Email Address"
-              placeholderTextColor="#002f6c"
-              selectionColor="#fff"
+              placeholderTextColor="#d7dee0"
+              selectionColor="#d7dee0"
               keyboardType="email-address"
             />
 
@@ -357,8 +391,8 @@ const LoginPage = (props) => {
               onChangeText={(password) => setpasswordCredencials(password)}
               underlineColorAndroid="rgba(0,0,0,0)"
               placeholder="Password"
-              placeholderTextColor="#002f6c"
-              selectionColor="#fff"
+              placeholderTextColor="#d7dee0"
+              selectionColor="#d7dee0"
               secureTextEntry={true}
             />
 
@@ -389,12 +423,12 @@ const LoginPage = (props) => {
               onPress={() => signInUser(email, password)}
               style={styles.UserButton}
             >
-              <Text style={{ color: "#fff" }}>Login</Text>
+              <Text style={{ color: "#d7dee0" }}>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => viewSignUp()} style={styles.text}>
               <Text
                 style={{
-                  color: "#000000",
+                  color: "#d7dee0",
                 }}
               >
                 Don't have an account ? Sign Up
@@ -439,11 +473,17 @@ const LoginPage = (props) => {
 
 const LoggedInPage = () => {
   return (
-    <View style={styles.container}>
-      <Homepage />
-
-      {/* <Text style={styles.header}>Welcome:{props.name}</Text>
-      <Image style={styles.image} source={{ uri: props.photoUrl }} /> */}
+    <View>
+      
+        <View
+          style={{
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          
+     <Homepage/> 
+        </View> 
     </View>
   );
 };

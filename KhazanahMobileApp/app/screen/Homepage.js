@@ -39,13 +39,29 @@ export default class Homepage extends React.Component {
     }
   render() {
     return (
-      <View style={styles.container}>
-         < TouchableOpacity>
-          <Text >
-            
-            {this.state.jwtToken}
-          </Text>    </TouchableOpacity>
-      </View>
+      <View>
+      
+      <View
+        style={{
+          alignContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text style={
+           {fontSize: 50,
+           padding: 1,
+           color:"#d7dee0"}}>
+             User Logged in
+             </Text>
+         <Text style={
+           {fontSize:20,
+           paddingBottom: 10,
+           color:"#d7dee0"}}>
+             add a text here 
+             </Text>
+  
+      </View>   
+  </View>
     );
   }
 }
